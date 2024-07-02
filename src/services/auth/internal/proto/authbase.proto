@@ -1,0 +1,15 @@
+syntax = "proto3";
+package varso_auth;
+
+option go_package = "client/models";
+
+message User {
+	string uuid = 1;
+	bool banned = 2;
+}
+
+message Role {
+	string uuid = 1;
+	string key = 2;
+	repeated string permissions = 3;
+}

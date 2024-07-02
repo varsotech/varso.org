@@ -1,0 +1,24 @@
+syntax = "proto3";
+package varso_app;
+
+import "appbase.proto";
+
+option go_package = "client/models";
+
+message GetOrganizationsResponse {
+  repeated Organization organizations = 1;
+}
+
+message GetNewsResponse {
+  map<string, Organization> organizations = 1;
+  RSSItem featured = 2;
+  RSSFeed latest = 3;
+}
+
+message BlurToggleRequest {
+  string rss_item_id = 1;
+}
+
+message DeleteNewsItemRequest {
+  string rss_item_id = 1;
+}

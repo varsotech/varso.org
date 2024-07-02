@@ -1,0 +1,5 @@
+const config = {
+  SYSTEM_EXTERNAL_URL: "@{{SYSTEM_EXTERNAL_URL}}",
+};
+
+export default config;

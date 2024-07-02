@@ -1,0 +1,203 @@
+version: '3.9'
+services:
+  auth:
+    build:
+      context: .
+      dockerfile: ./src/dev.Dockerfile
+      target: goappapi
+      args:
+        SERVICE: auth
+        PORT: 5000
+    depends_on:
+      - postgres
+    env_file:
+      - .env
+    ports:
+      - 5000:5000
+      - 2346:2345
+    networks:
+      - bridge_network
+    volumes:
+      - ./:/app
+    deploy:
+      restart_policy:   
+        condition: on-failure   
+        max_attempts: 5
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:5000/api/v1/auth"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  app:
+    build:
+      context: .
+      dockerfile: ./src/dev.Dockerfile
+      target: goappapi
+      args:
+        SERVICE: app
+        PORT: 5001
+    depends_on:
+      - postgres
+    env_file:
+      - .env
+    ports:
+      - 5001:5001
+      - 2347:2345
+    networks:
+      - bridge_network
+    volumes:
+      - ./:/app
+    deploy:
+      restart_policy:   
+        condition: on-failure   
+        max_attempts: 5
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:5001/api/v1/app"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  fileserver:
+    build:
+      context: .
+      dockerfile: ./src/dev.Dockerfile
+      target: goappapi
+      args:
+        SERVICE: fileserver
+        PORT: 5002
+    volumes:
+      - ./:/app
+    depends_on:
+      - postgres
+    env_file:
+      - .env
+    ports:
+      - 5002:5002
+      - 2348:2345
+    networks:
+      - bridge_network
+    deploy:
+      restart_policy:   
+        condition: on-failure   
+        max_attempts: 5
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:5002/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  analytics:
+    build:
+      context: .
+      dockerfile: ./src/dev.Dockerfile
+      target: goappapi
+      args:
+        SERVICE: analytics
+        PORT: 5003
+    depends_on:
+      - postgres
+    env_file:
+      - .env
+    ports:
+      - 5003:5003
+      - 2349:2345
+    networks:
+      - bridge_network
+    volumes:
+      - ./:/app
+    deploy:
+      restart_policy:   
+        condition: on-failure   
+        max_attempts: 5
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:5003/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  nginx:
+    build:
+      context: .
+      dockerfile: ./src/services/nginx/Dockerfile
+      args:
+        SYSTEM_EXTERNAL_URL: ${SYSTEM_EXTERNAL_URL}
+    volumes:
+        - certbotdata:/var/www/certbot/:ro
+        - letsencrypt:/etc/letsencrypt/:rw
+        - ./:/app
+    env_file:
+      - .env
+    ports:
+      - 80:80
+      - 443:443
+    networks: 
+      - bridge_network
+    depends_on:
+      - auth
+      - app
+      - fileserver
+    deploy:
+      restart_policy:   
+        condition: on-failure   
+        max_attempts: 10
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  postgres:
+    build:
+      context: .
+      dockerfile: ./src/services/postgres/Dockerfile
+    env_file:
+      - .env
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    networks:
+      - bridge_network
+    deploy:
+      restart_policy:   
+        condition: on-failure   
+        max_attempts: 5
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+  
+  minio:
+    image: minio/minio
+    command: server --console-address ":9001" /data
+    volumes:
+      - filestorage:/data
+    ports:
+      - 9000:9000
+      - 9001:9001
+    networks:
+      - bridge_network
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    environment:
+      MINIO_ROOT_USER: ${FILESTORAGE_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${FILESTORAGE_SECRET_KEY}
+    deploy:
+      restart_policy:   
+        condition: on-failure   
+        max_attempts: 5
+
+networks:
+  bridge_network:
+    driver: bridge
+
+volumes:
+  filestorage:
+  postgres-data:
+  letsencrypt:
+  certbotdata:

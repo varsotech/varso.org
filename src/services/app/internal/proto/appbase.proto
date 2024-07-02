@@ -1,0 +1,48 @@
+syntax = "proto3";
+package varso_app;
+
+option go_package = "client/models";
+
+import "google/protobuf/timestamp.proto";
+
+message Organization {
+	string uuid = 1;
+	string unique_name = 2;
+	string name = 3;
+	string description = 4;
+	string website_url = 5;
+	string logo_image_url = 6;
+}
+
+message RSSFeed {
+	repeated RSSItem items = 1;
+}
+
+message RSSItem {
+	string title = 1;
+	string description = 2;
+	string content = 3;
+	string link = 4;
+	repeated string links = 5;
+	google.protobuf.Timestamp update_date = 6;
+	google.protobuf.Timestamp publish_date = 7;
+	repeated RSSAuthor authors = 8;
+	string guid = 9;
+	RSSImage image = 10;
+	repeated string categories = 11;
+	string organization_uuid = 12;
+	string id = 13;
+	RSSItem see_also_item = 14;
+	int64 rank = 15;
+}
+
+message RSSAuthor {
+	string email = 1;
+	string name = 2;
+}
+
+message RSSImage {
+	string url = 1;
+	string title = 2;
+	bool blur = 3;
+}

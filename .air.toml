@@ -1,0 +1,44 @@
+# Config file for [Air](https://github.com/cosmtrek/air) in TOML format
+
+# Working directory
+# . or absolute path, please note that the directories following must be under root
+root = "."
+tmp_dir = "tmp"
+
+[build]
+# This is provided as a parameter to air directly from Dockerfile
+# cmd = "go build -o ./tmp/app/engine src/services/discord_bot/main.go"
+
+# Binary file yields from `cmd`.
+# This is provided as a parameter to air directly from Dockerfile
+# bin = "tmp/app"
+
+# Customize binary.
+
+# This is how you start to run your application. Since my application will works like CLI, so to run it, like to make a CLI call.
+# This is provided as a parameter to air directly from Dockerfile
+# full_bin = "./tmp/app/engine http"
+stop_on_error = true
+
+# This log file places in your tmp_dir.
+log = "air_errors.log"
+
+# Watch these filename extensions.
+include_ext = ["go", "yaml"]
+
+# Ignore these filename extensions or directories.
+# exclude_dir = ["tmp"]
+
+# It's not necessary to trigger build each time file changes if it's too frequent.
+delay = 2000 # ms
+
+send_interrupt = true
+kill_delay = 3000
+
+[log]
+# Show log time
+time = true
+
+[misc]
+# Delete tmp directory on exit
+clean_on_exit = false

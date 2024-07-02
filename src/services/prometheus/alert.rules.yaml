@@ -1,0 +1,25 @@
+groups:
+  - name: general
+    rules:
+      # Alert for any instance that is unreachable for >2 minutes.
+      - alert: DockerServiceDown
+        expr: count(container_memory_usage_bytes{id="/docker/<service_name>"}) < 1
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Docker service {{ $labels.id }} is down"
+          description: "The Docker service {{ $labels.id }} has been down for more than 1 minute."
+
+      - alert: HighLoad
+        expr: avg(irate(node_cpu_seconds_total{mode="idle"}[1m]) * 100) < 30
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          title: high_load
+          summary: "Instance {{ $labels.instance }} under high load"
+          description: "{{ $labels.instance }} of job {{ $labels.job }} is under high load."
+          content: "{{ $labels.instance }} of job {{ $labels.job }} is under high load."
+          instance: "{{ $labels.instance }}"
+          job: "{{ $labels.job }}"

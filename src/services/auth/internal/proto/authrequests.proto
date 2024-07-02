@@ -1,0 +1,71 @@
+syntax = "proto3";
+package varso_auth;
+
+import "authbase.proto";
+
+option go_package = "client/models";
+
+message BanUserRequest {
+}
+
+message BanUserResponse {
+  string banned_user_discord_id = 1;
+}
+
+message DiscordLoginRequest {
+	string internal_login_auth_secret = 1;
+	string discord_user_id = 2;
+}
+
+message DiscordLoginResponse {
+	string token = 1;
+}
+
+message GetUserResponse {
+	User user = 1;
+}
+
+message GetUserByDiscordIdResponse {
+	User user = 1;
+}
+
+message InternalLoginRequest {
+	string internal_login_auth_secret = 1;
+}
+
+message InternalLoginResponse {
+	string token = 1;
+}
+
+message RegisterRequest {
+	string email = 1;
+	string password = 2;
+}
+
+message RegisterResponse {
+	string token = 1;
+}
+
+message EasyRegisterRequest {
+	string name = 1;
+}
+
+message EasyRegisterResponse {
+	string token = 1;
+}
+
+message LoginRequest {
+	string username_or_email = 1;
+	string password = 2;
+}
+
+message LoginResponse {
+	string token = 1;
+}
+
+message UnbanUserRequest {
+}
+
+message UnbanUserResponse {
+	string user_discord_id = 1;
+}

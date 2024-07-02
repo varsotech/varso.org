@@ -1,0 +1,412 @@
+services:
+  auth:
+    image: ${CONTAINER_REGISTRY}/${GIT_FULL_REPO_NAME}/auth:${DOCKER_IMAGE_TAG}
+    depends_on:
+      - postgres
+    env_file:
+      - .env
+    ports:
+      - 5000:5000
+    networks:
+      - bridge_network
+    restart: always
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:5000/api/v1/auth"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    labels:
+      logging: "promtail"
+      logging_jobname: "containerlogs"
+
+
+  app:
+    image: ${CONTAINER_REGISTRY}/${GIT_FULL_REPO_NAME}/app:${DOCKER_IMAGE_TAG}
+    depends_on:
+      - postgres
+    env_file:
+      - .env
+    ports:
+      - 5001:5001
+    networks:
+      - bridge_network
+    restart: always
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:5001/api/v1/app"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    labels:
+      logging: "promtail"
+      logging_jobname: "containerlogs"
+
+  fileserver:
+    image: ${CONTAINER_REGISTRY}/${GIT_FULL_REPO_NAME}/fileserver:${DOCKER_IMAGE_TAG}
+    volumes:
+      - ./:/app
+    depends_on:
+      - postgres
+    env_file:
+      - .env
+    ports:
+      - 5002:5002
+    networks:
+      - bridge_network
+    restart: always
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:5002/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    labels:
+      logging: "promtail"
+      logging_jobname: "containerlogs"
+
+  analytics:
+    image: ${CONTAINER_REGISTRY}/${GIT_FULL_REPO_NAME}/analytics:${DOCKER_IMAGE_TAG}
+    depends_on:
+      - postgres
+    env_file:
+      - .env
+    ports:
+      - 5003:5003
+    networks:
+      - bridge_network
+    restart: always
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:5003/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    labels:
+      logging: "promtail"
+      logging_jobname: "containerlogs"
+
+  nginx:
+    image: ${CONTAINER_REGISTRY}/${GIT_FULL_REPO_NAME}/nginx:${DOCKER_IMAGE_TAG}
+    volumes:
+        - certbotdata:/var/www/certbot/:ro
+        - letsencrypt:/etc/letsencrypt/:rw
+    env_file:
+      - .env
+    ports: 
+      - 80:80
+      - 443:443
+    networks: 
+      - bridge_network
+    depends_on:
+      - auth
+      - app
+      - fileserver
+      - grafana
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    labels:
+      logging: "promtail"
+      logging_jobname: "containerlogs"
+
+  postgres:
+    image: ${CONTAINER_REGISTRY}/${GIT_FULL_REPO_NAME}/postgres:${DOCKER_IMAGE_TAG}
+    env_file:
+      - .env
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    networks:
+      - bridge_network
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    labels:
+      logging: "promtail"
+      logging_jobname: "containerlogs"
+
+  minio:
+    image: minio/minio
+    restart: always
+    command: server --console-address ":9001" /data
+    volumes:
+      - filestorage:/data
+    ports:
+      - 9000:9000
+      - 9001:9001
+    networks:
+      - bridge_network
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    environment:
+      MINIO_ROOT_USER: ${FILESTORAGE_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${FILESTORAGE_SECRET_KEY}
+    labels:
+      logging: "promtail"
+      logging_jobname: "containerlogs"
+
+  prometheus:
+    image: ${CONTAINER_REGISTRY}/${GIT_FULL_REPO_NAME}/prometheus:${DOCKER_IMAGE_TAG}
+    restart: always
+    volumes:
+      - prometheus_data:/prometheus:rw
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yaml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    ports:
+      - 9090:9090
+    links:
+      - cadvisor:cadvisor
+      - alertmanager:alertmanager
+    depends_on:
+      - cadvisor
+    networks:
+      - bridge_network
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "echo", "Empty healthcheck"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # PRODUCTION ONlY SERVICES
+
+  certbot:
+    image: ${CONTAINER_REGISTRY}/${GIT_FULL_REPO_NAME}/certbot:${DOCKER_IMAGE_TAG}
+    volumes:
+      - certbotdata:/var/www/certbot/:rw
+      - letsencrypt:/etc/letsencrypt/:rw
+      - ./log/letsencrypt/:/var/log/letsencrypt/:rw
+    env_file:
+      - .env
+    restart: "no"
+    depends_on:
+      - nginx
+    healthcheck:
+      test: ["CMD", "echo", "Empty healthcheck"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    labels:
+      logging: "promtail"
+      logging_jobname: "containerlogs"
+
+  node_exporter:
+    image: prom/node-exporter
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - --collector.filesystem.ignored-mount-points
+      - '^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)'
+    ports:
+      - 9100:9100
+    deploy:
+      mode: global
+    restart: always
+    networks:
+      - bridge_network
+    healthcheck:
+      test: ["CMD", "echo", "Empty healthcheck"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  alertmanager:
+    image: ${CONTAINER_REGISTRY}/${GIT_FULL_REPO_NAME}/alertmanager:${DOCKER_IMAGE_TAG}
+    ports:
+      - 9093:9093
+    volumes:
+      - alertmanager:/alertmanager
+    restart: always
+    env_file:
+      - .env
+    networks:
+      - bridge_network
+    healthcheck:
+      test: ["CMD", "echo", "Empty healthcheck"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  alertmanager_discord:
+    image: ${CONTAINER_REGISTRY}/${GIT_FULL_REPO_NAME}/alertmanager_discord:${DOCKER_IMAGE_TAG}
+    depends_on:
+      - postgres
+    env_file:
+      - .env
+    ports:
+      - 9094:9094
+    restart: always
+    networks:
+      - bridge_network
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:9094/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    labels:
+      logging: "promtail"
+      logging_jobname: "containerlogs"
+
+  loki:
+    image: ${CONTAINER_REGISTRY}/${GIT_FULL_REPO_NAME}/loki:${DOCKER_IMAGE_TAG}
+    ports:
+      - "3100:3100"
+    networks:
+      - bridge_network
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3100/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  promtail:
+    image: ${CONTAINER_REGISTRY}/${GIT_FULL_REPO_NAME}/promtail:${DOCKER_IMAGE_TAG}
+    volumes:
+      - /var/log:/var/log
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: -config.file=/etc/promtail/config.yml
+    networks:
+      - bridge_network
+    healthcheck:
+      test: ["CMD", "echo", "Empty healthcheck"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.47.1
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/snap/docker/common/var-lib-docker/:/var/lib/docker:ro
+    ports:
+      - 8080:8080
+    restart: always
+    deploy:
+      mode: global
+    command:
+      - "--port=8080"
+      - "--housekeeping_interval=30s"
+      - "--disable_metrics=percpu,sched,hugetlb,referenced_memory,cpu_topology,resctrl"
+    networks:
+      - bridge_network
+    healthcheck:
+      test: ["CMD", "echo", "Empty healthcheck"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  grafana:
+    image: ${CONTAINER_REGISTRY}/${GIT_FULL_REPO_NAME}/grafana:${DOCKER_IMAGE_TAG}
+    restart: always
+    entrypoint:
+      - sh
+      - -euc
+      - /run.sh
+    volumes:
+      - grafana_data:/var/lib/grafana:rw
+    env_file:
+      - .env
+    environment:
+      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+    ports:
+      - 3000:3000
+    depends_on:
+      - prometheus
+    networks:
+      - bridge_network
+    healthcheck:
+      test: ["CMD", "echo", "Empty healthcheck"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # Plausible
+  mail:
+    image: bytemark/smtp
+    restart: always
+    healthcheck:
+      test: [ "CMD", "echo", "Empty healthcheck" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - bridge_network
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:23.3.7.5-alpine
+    restart: always
+    volumes:
+      - event-data:/var/lib/clickhouse
+      - ./clickhouse/clickhouse-config.xml:/etc/clickhouse-server/config.d/logging.xml:ro
+      - ./clickhouse/clickhouse-user-config.xml:/etc/clickhouse-server/users.d/logging.xml:ro
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    healthcheck:
+      test: [ "CMD", "echo", "Empty healthcheck" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - bridge_network
+
+  plausible:
+    image: plausible/analytics:v2.0
+    restart: always
+    command: sh -c "sleep 10 && /entrypoint.sh db createdb && /entrypoint.sh db migrate && /entrypoint.sh run"
+    depends_on:
+      - postgres
+      - clickhouse
+      - mail
+    ports:
+      - 127.0.0.1:8000:8000
+    environment:
+      - BASE_URL=${PLAUSIBLE_BASE_URL}
+      - SECRET_KEY_BASE=${PLAUSIBLE_SECRET_KEY}
+      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/plausible_db
+      - CLICKHOUSE_DATABASE_URL=http://clickhouse:8123/plausible_events_db
+    healthcheck:
+      test: [ "CMD", "echo", "Empty healthcheck" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - bridge_network
+
+networks:
+  bridge_network:
+    driver: bridge
+
+volumes:
+  filestorage:
+  prometheus_data:
+  grafana_data:
+  postgres-data:
+  letsencrypt:
+  alertmanager:
+  certbotdata:
+  db-data:
+    driver: local
+  event-data:
+    driver: local
