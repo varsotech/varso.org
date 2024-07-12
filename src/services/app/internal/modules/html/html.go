@@ -5,11 +5,14 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/net/html"
 )
+
+const maxRetries = 5
 
 type RedirectError struct{}
 
@@ -39,15 +42,12 @@ func (h *HTML) lazyLoad() error {
 	// HACK: news.google.com proxy will only return 302 for cURL, otherwise it will do a javascript redirect.
 	req.Header.Set("User-Agent", "curl/8.1.2")
 
-	resp, err := c.Do(req)
+	// Run with retries
+	resp, err := h.doWithRetries(req, c)
 	if err != nil {
-		return errors.Wrapf(err, "unable to retrieve item HTML")
+		return errors.Wrap(err, "failed loading html with retries")
 	}
 	defer resp.Body.Close()
-
-	if resp.StatusCode != 200 {
-		return errors.Errorf("got bad status code %d retrieving item HTML", resp.StatusCode)
-	}
 
 	h.finalUrl = resp.Request.URL.String()
 
@@ -65,6 +65,33 @@ func (h *HTML) lazyLoad() error {
 	h.html = doc
 
 	return nil
+}
+
+func (h *HTML) doRequest(req *http.Request, c http.Client) (*http.Response, error) {
+	resp, err := c.Do(req)
+	if err != nil {
+		return nil, errors.Wrapf(err, "unable to retrieve item HTML")
+	}
+
+	if resp.StatusCode != 200 {
+		resp.Body.Close()
+		return nil, errors.Errorf("got bad status code %d retrieving item HTML", resp.StatusCode)
+	}
+
+	return resp, nil
+}
+
+func (h *HTML) doWithRetries(req *http.Request, c http.Client) (resp *http.Response, err error) {
+	for i := 0; i < maxRetries; i++ {
+		resp, err = h.doRequest(req, c)
+		if err == nil {
+			break
+		}
+
+		time.Sleep(1 * time.Second)
+	}
+
+	return
 }
 
 func (h *HTML) GetHTML() (string, error) {

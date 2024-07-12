@@ -1,0 +1,1 @@
+UPDATE rss_feeds SET rss_feed_url = 'https://news.google.com/rss/search?q=allinurl:bdsmovement.net&hl=en-IL&gl=IL&ceid=IL:en' WHERE rss_feed_url = 'https://bdsmovement.net/rss-feed.xml';

@@ -76,7 +76,8 @@ var orgs = []struct {
 			WebsiteUrl:   "https://bdsmovement.net",
 			LogoImageUrl: "/organizations/bds_logo.png",
 		},
-		RssFeedUrl:  "https://bdsmovement.net/rss-feed.xml",
+		//RssFeedUrl: "https://bdsmovement.net/rss-feed.xml",
+		RssFeedUrl:  "https://news.google.com/rss/search?q=allinurl:bdsmovement.net&hl=en-IL&gl=IL&ceid=IL:en",
 		RssFeedRank: rankTierSubstandard,
 	},
 
@@ -141,7 +142,7 @@ var orgs = []struct {
 			LogoImageUrl: "/organizations/associatedpress_logo.svg",
 		},
 		RssFeedUrl:                  "https://news.google.com/rss/search?q=allinurl:apnews.com&hl=en-IL&gl=IL&ceid=IL:en",
-		RssFeedRank:                 rankTierLow,
+		RssFeedRank:                 rankTierSuppressed,
 		ContentWhitelistRegex:       whitelistRegex,
 		TitleOrDescriptionTrimRight: " - The Associated Press",
 	},
