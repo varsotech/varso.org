@@ -7,13 +7,13 @@ services:
       target: goappapi
       args:
         SERVICE: auth
-        PORT: 5000
+        PORT: 5004
     depends_on:
       - postgres
     env_file:
       - .env
     ports:
-      - 5000:5000
+      - 5004:5004
       - 2346:2345
     networks:
       - bridge_network
@@ -24,7 +24,7 @@ services:
         condition: on-failure   
         max_attempts: 5
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:5000/api/v1/auth"]
+      test: ["CMD", "wget", "-qO-", "http://localhost:5004/api/v1/auth"]
       interval: 10s
       timeout: 5s
       retries: 3
