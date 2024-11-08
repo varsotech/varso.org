@@ -24,15 +24,24 @@ go generate ./...
 ./scripts/setup_dev_env.sh
 ```
 
+4. For frontend development, enable this chrome flag: [chrome://flags/#allow-insecure-localhost](chrome://flags/#allow-insecure-localhost)
+
 ## Running the system
 
 1. Run the system using the following command:
 
 ```
-docker compose up -d --build
+# Changes to nginx.conf require specifying --build as well.
+docker compose up -d
 ```
 
-Note that any changes to nginx require rebuilding the service by specifying `--build`.
+2. Run the frontend
+
+```
+cd src/services/www
+npm install
+npm start
+```
 
 ## Publishing the API NPM package
 
