@@ -129,7 +129,7 @@ func syncRSSFeeds(ctx context.Context) error {
 					}
 
 					itemHTML := html.NewHTMLFromURL(item.Link)
-					if imageUrl == "" {
+					if imageUrl == "" && !feed.DiscardOgImage {
 						ogImage := itemHTML.GetOGImage()
 						if ogImage != "" {
 							imageUrl = ogImage
@@ -161,7 +161,7 @@ func syncRSSFeeds(ctx context.Context) error {
 							continue
 						}
 
-						isPaywalled = htmlPaywallRegex.MatchString(strings.ToLower(string(respContent)))
+						isPaywalled = htmlPaywallRegex.MatchString(strings.ToLower(respContent))
 					}
 
 					finalUrl, err := itemHTML.GetFinalURL()

@@ -3642,6 +3642,7 @@ type RSSFeedMutation struct {
 	addrss_feed_rank          *float32
 	max_fetch_interval_min    *int64
 	addmax_fetch_interval_min *int64
+	discard_og_image          *bool
 	clearedFields             map[string]struct{}
 	items                     map[uuid.UUID]struct{}
 	removeditems              map[uuid.UUID]struct{}
@@ -4152,6 +4153,42 @@ func (m *RSSFeedMutation) ResetMaxFetchIntervalMin() {
 	delete(m.clearedFields, rssfeed.FieldMaxFetchIntervalMin)
 }
 
+// SetDiscardOgImage sets the "discard_og_image" field.
+func (m *RSSFeedMutation) SetDiscardOgImage(b bool) {
+	m.discard_og_image = &b
+}
+
+// DiscardOgImage returns the value of the "discard_og_image" field in the mutation.
+func (m *RSSFeedMutation) DiscardOgImage() (r bool, exists bool) {
+	v := m.discard_og_image
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDiscardOgImage returns the old "discard_og_image" field's value of the RSSFeed entity.
+// If the RSSFeed object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RSSFeedMutation) OldDiscardOgImage(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDiscardOgImage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDiscardOgImage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDiscardOgImage: %w", err)
+	}
+	return oldValue.DiscardOgImage, nil
+}
+
+// ResetDiscardOgImage resets all changes to the "discard_og_image" field.
+func (m *RSSFeedMutation) ResetDiscardOgImage() {
+	m.discard_og_image = nil
+}
+
 // AddItemIDs adds the "items" edge to the NewsItem entity by ids.
 func (m *RSSFeedMutation) AddItemIDs(ids ...uuid.UUID) {
 	if m.items == nil {
@@ -4279,7 +4316,7 @@ func (m *RSSFeedMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *RSSFeedMutation) Fields() []string {
-	fields := make([]string, 0, 8)
+	fields := make([]string, 0, 9)
 	if m.create_time != nil {
 		fields = append(fields, rssfeed.FieldCreateTime)
 	}
@@ -4303,6 +4340,9 @@ func (m *RSSFeedMutation) Fields() []string {
 	}
 	if m.max_fetch_interval_min != nil {
 		fields = append(fields, rssfeed.FieldMaxFetchIntervalMin)
+	}
+	if m.discard_og_image != nil {
+		fields = append(fields, rssfeed.FieldDiscardOgImage)
 	}
 	return fields
 }
@@ -4328,6 +4368,8 @@ func (m *RSSFeedMutation) Field(name string) (ent.Value, bool) {
 		return m.RssFeedRank()
 	case rssfeed.FieldMaxFetchIntervalMin:
 		return m.MaxFetchIntervalMin()
+	case rssfeed.FieldDiscardOgImage:
+		return m.DiscardOgImage()
 	}
 	return nil, false
 }
@@ -4353,6 +4395,8 @@ func (m *RSSFeedMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldRssFeedRank(ctx)
 	case rssfeed.FieldMaxFetchIntervalMin:
 		return m.OldMaxFetchIntervalMin(ctx)
+	case rssfeed.FieldDiscardOgImage:
+		return m.OldDiscardOgImage(ctx)
 	}
 	return nil, fmt.Errorf("unknown RSSFeed field %s", name)
 }
@@ -4417,6 +4461,13 @@ func (m *RSSFeedMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetMaxFetchIntervalMin(v)
+		return nil
+	case rssfeed.FieldDiscardOgImage:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDiscardOgImage(v)
 		return nil
 	}
 	return fmt.Errorf("unknown RSSFeed field %s", name)
@@ -4550,6 +4601,9 @@ func (m *RSSFeedMutation) ResetField(name string) error {
 		return nil
 	case rssfeed.FieldMaxFetchIntervalMin:
 		m.ResetMaxFetchIntervalMin()
+		return nil
+	case rssfeed.FieldDiscardOgImage:
+		m.ResetDiscardOgImage()
 		return nil
 	}
 	return fmt.Errorf("unknown RSSFeed field %s", name)

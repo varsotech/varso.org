@@ -12,7 +12,7 @@ import (
 	"github.com/luminancetech/varso/src/services/app/internal/ent/build/rssfeed"
 )
 
-func Upsert(ctx context.Context, orgUuid uuid.UUID, rssFeedUrl, contentWhitelistRegex, htmlPaywallRegex, titleTrimRight string, rssFeedRank float32, maxFetchIntervalMin int64) error {
+func Upsert(ctx context.Context, orgUuid uuid.UUID, rssFeedUrl, contentWhitelistRegex, htmlPaywallRegex, titleTrimRight string, rssFeedRank float32, maxFetchIntervalMin int64, ignoreOgImage bool) error {
 	if rssFeedUrl == "" {
 		return fmt.Errorf("rss feed url cannot be empty")
 	}
@@ -25,10 +25,12 @@ func Upsert(ctx context.Context, orgUuid uuid.UUID, rssFeedUrl, contentWhitelist
 		SetHTMLPaywallRegex(htmlPaywallRegex).
 		SetTitleTrimRight(titleTrimRight).
 		SetMaxFetchIntervalMin(maxFetchIntervalMin).
+		SetDiscardOgImage(ignoreOgImage).
 		OnConflictColumns(rssfeed.FieldRssFeedURL).
 		UpdateNewValues().
 		UpdateContentWhitelistRegex().
 		UpdateHTMLPaywallRegex().
+		UpdateDiscardOgImage().
 		Exec(ctx)
 	if err != nil {
 		return err

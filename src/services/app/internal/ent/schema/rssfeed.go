@@ -36,6 +36,7 @@ func (RSSFeed) Fields() []ent.Field {
 		field.String("title_trim_right").Optional(),
 		field.Float32("rss_feed_rank").Optional(),
 		field.Int64("max_fetch_interval_min").Optional(),
+		field.Bool("discard_og_image"),
 	}
 }
 

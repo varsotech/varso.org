@@ -35,6 +35,8 @@ type RSSFeed struct {
 	RssFeedRank float32 `json:"rss_feed_rank,omitempty"`
 	// MaxFetchIntervalMin holds the value of the "max_fetch_interval_min" field.
 	MaxFetchIntervalMin int64 `json:"max_fetch_interval_min,omitempty"`
+	// DiscardOgImage holds the value of the "discard_og_image" field.
+	DiscardOgImage bool `json:"discard_og_image,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the RSSFeedQuery when eager-loading is set.
 	Edges              RSSFeedEdges `json:"edges"`
@@ -78,6 +80,8 @@ func (*RSSFeed) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case rssfeed.FieldDiscardOgImage:
+			values[i] = new(sql.NullBool)
 		case rssfeed.FieldRssFeedRank:
 			values[i] = new(sql.NullFloat64)
 		case rssfeed.FieldMaxFetchIntervalMin:
@@ -159,6 +163,12 @@ func (rf *RSSFeed) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				rf.MaxFetchIntervalMin = value.Int64
 			}
+		case rssfeed.FieldDiscardOgImage:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field discard_og_image", values[i])
+			} else if value.Valid {
+				rf.DiscardOgImage = value.Bool
+			}
 		case rssfeed.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
 				return fmt.Errorf("unexpected type %T for field organization_feeds", values[i])
@@ -235,6 +245,9 @@ func (rf *RSSFeed) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("max_fetch_interval_min=")
 	builder.WriteString(fmt.Sprintf("%v", rf.MaxFetchIntervalMin))
+	builder.WriteString(", ")
+	builder.WriteString("discard_og_image=")
+	builder.WriteString(fmt.Sprintf("%v", rf.DiscardOgImage))
 	builder.WriteByte(')')
 	return builder.String()
 }
