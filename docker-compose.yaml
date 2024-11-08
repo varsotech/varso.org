@@ -6,12 +6,12 @@ services:
     env_file:
       - .env
     ports:
-      - 5000:5000
+      - 5004:5004
     networks:
       - bridge_network
     restart: always
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:5000/api/v1/auth"]
+      test: ["CMD", "wget", "-qO-", "http://localhost:5004/api/v1/auth"]
       interval: 10s
       timeout: 5s
       retries: 3

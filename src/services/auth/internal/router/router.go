@@ -15,5 +15,5 @@ func ListenAndServe(ctx context.Context) error {
 	// api.RoutePOST(router, api.Public, "/api/v1/auth/register", register.Register) // Registration closed
 	// api.RoutePOST(router, api.Public, "/api/v1/auth/internal_login", internal_login.InternalLogin) // TODO: Separate to different port
 
-	return router.ListenAndServe(":5000")
+	return router.ListenAndServe(":5004")
 }

@@ -128,7 +128,7 @@ jobs:
           - service: auth
             build-args: |
               SERVICE=auth
-              PORT=5000
+              PORT=5004
           - service: app
             build-args: |
               SERVICE=app
