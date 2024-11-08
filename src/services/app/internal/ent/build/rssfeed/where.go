@@ -96,6 +96,11 @@ func MaxFetchIntervalMin(v int64) predicate.RSSFeed {
 	return predicate.RSSFeed(sql.FieldEQ(FieldMaxFetchIntervalMin, v))
 }
 
+// DiscardOgImage applies equality check predicate on the "discard_og_image" field. It's identical to DiscardOgImageEQ.
+func DiscardOgImage(v bool) predicate.RSSFeed {
+	return predicate.RSSFeed(sql.FieldEQ(FieldDiscardOgImage, v))
+}
+
 // CreateTimeEQ applies the EQ predicate on the "create_time" field.
 func CreateTimeEQ(v time.Time) predicate.RSSFeed {
 	return predicate.RSSFeed(sql.FieldEQ(FieldCreateTime, v))
@@ -564,6 +569,16 @@ func MaxFetchIntervalMinIsNil() predicate.RSSFeed {
 // MaxFetchIntervalMinNotNil applies the NotNil predicate on the "max_fetch_interval_min" field.
 func MaxFetchIntervalMinNotNil() predicate.RSSFeed {
 	return predicate.RSSFeed(sql.FieldNotNull(FieldMaxFetchIntervalMin))
+}
+
+// DiscardOgImageEQ applies the EQ predicate on the "discard_og_image" field.
+func DiscardOgImageEQ(v bool) predicate.RSSFeed {
+	return predicate.RSSFeed(sql.FieldEQ(FieldDiscardOgImage, v))
+}
+
+// DiscardOgImageNEQ applies the NEQ predicate on the "discard_og_image" field.
+func DiscardOgImageNEQ(v bool) predicate.RSSFeed {
+	return predicate.RSSFeed(sql.FieldNEQ(FieldDiscardOgImage, v))
 }
 
 // HasItems applies the HasEdge predicate on the "items" edge.

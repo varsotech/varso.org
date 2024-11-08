@@ -165,6 +165,20 @@ func (rfu *RSSFeedUpdate) ClearMaxFetchIntervalMin() *RSSFeedUpdate {
 	return rfu
 }
 
+// SetDiscardOgImage sets the "discard_og_image" field.
+func (rfu *RSSFeedUpdate) SetDiscardOgImage(b bool) *RSSFeedUpdate {
+	rfu.mutation.SetDiscardOgImage(b)
+	return rfu
+}
+
+// SetNillableDiscardOgImage sets the "discard_og_image" field if the given value is not nil.
+func (rfu *RSSFeedUpdate) SetNillableDiscardOgImage(b *bool) *RSSFeedUpdate {
+	if b != nil {
+		rfu.SetDiscardOgImage(*b)
+	}
+	return rfu
+}
+
 // AddItemIDs adds the "items" edge to the NewsItem entity by IDs.
 func (rfu *RSSFeedUpdate) AddItemIDs(ids ...uuid.UUID) *RSSFeedUpdate {
 	rfu.mutation.AddItemIDs(ids...)
@@ -317,6 +331,9 @@ func (rfu *RSSFeedUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if rfu.mutation.MaxFetchIntervalMinCleared() {
 		_spec.ClearField(rssfeed.FieldMaxFetchIntervalMin, field.TypeInt64)
+	}
+	if value, ok := rfu.mutation.DiscardOgImage(); ok {
+		_spec.SetField(rssfeed.FieldDiscardOgImage, field.TypeBool, value)
 	}
 	if rfu.mutation.ItemsCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -546,6 +563,20 @@ func (rfuo *RSSFeedUpdateOne) ClearMaxFetchIntervalMin() *RSSFeedUpdateOne {
 	return rfuo
 }
 
+// SetDiscardOgImage sets the "discard_og_image" field.
+func (rfuo *RSSFeedUpdateOne) SetDiscardOgImage(b bool) *RSSFeedUpdateOne {
+	rfuo.mutation.SetDiscardOgImage(b)
+	return rfuo
+}
+
+// SetNillableDiscardOgImage sets the "discard_og_image" field if the given value is not nil.
+func (rfuo *RSSFeedUpdateOne) SetNillableDiscardOgImage(b *bool) *RSSFeedUpdateOne {
+	if b != nil {
+		rfuo.SetDiscardOgImage(*b)
+	}
+	return rfuo
+}
+
 // AddItemIDs adds the "items" edge to the NewsItem entity by IDs.
 func (rfuo *RSSFeedUpdateOne) AddItemIDs(ids ...uuid.UUID) *RSSFeedUpdateOne {
 	rfuo.mutation.AddItemIDs(ids...)
@@ -728,6 +759,9 @@ func (rfuo *RSSFeedUpdateOne) sqlSave(ctx context.Context) (_node *RSSFeed, err 
 	}
 	if rfuo.mutation.MaxFetchIntervalMinCleared() {
 		_spec.ClearField(rssfeed.FieldMaxFetchIntervalMin, field.TypeInt64)
+	}
+	if value, ok := rfuo.mutation.DiscardOgImage(); ok {
+		_spec.SetField(rssfeed.FieldDiscardOgImage, field.TypeBool, value)
 	}
 	if rfuo.mutation.ItemsCleared() {
 		edge := &sqlgraph.EdgeSpec{

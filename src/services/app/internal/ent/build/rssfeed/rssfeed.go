@@ -31,6 +31,8 @@ const (
 	FieldRssFeedRank = "rss_feed_rank"
 	// FieldMaxFetchIntervalMin holds the string denoting the max_fetch_interval_min field in the database.
 	FieldMaxFetchIntervalMin = "max_fetch_interval_min"
+	// FieldDiscardOgImage holds the string denoting the discard_og_image field in the database.
+	FieldDiscardOgImage = "discard_og_image"
 	// EdgeItems holds the string denoting the items edge name in mutations.
 	EdgeItems = "items"
 	// EdgeOrganization holds the string denoting the organization edge name in mutations.
@@ -64,6 +66,7 @@ var Columns = []string{
 	FieldTitleTrimRight,
 	FieldRssFeedRank,
 	FieldMaxFetchIntervalMin,
+	FieldDiscardOgImage,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "rss_feeds"
@@ -144,6 +147,11 @@ func ByRssFeedRank(opts ...sql.OrderTermOption) OrderOption {
 // ByMaxFetchIntervalMin orders the results by the max_fetch_interval_min field.
 func ByMaxFetchIntervalMin(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldMaxFetchIntervalMin, opts...).ToFunc()
+}
+
+// ByDiscardOgImage orders the results by the discard_og_image field.
+func ByDiscardOgImage(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDiscardOgImage, opts...).ToFunc()
 }
 
 // ByItemsCount orders the results by items count.

@@ -30,6 +30,7 @@ var orgs = []struct {
 	HtmlPaywallRegex            string
 	TitleOrDescriptionTrimRight string
 	MaxFetchIntervalMin         int64
+	DisacrdOGImage              bool
 }{
 	{
 		Organization: &models.Organization{
@@ -77,8 +78,9 @@ var orgs = []struct {
 			LogoImageUrl: "/organizations/bds_logo.png",
 		},
 		//RssFeedUrl: "https://bdsmovement.net/rss-feed.xml",
-		RssFeedUrl:  "https://news.google.com/rss/search?q=allinurl:bdsmovement.net&hl=en-IL&gl=IL&ceid=IL:en",
-		RssFeedRank: rankTierSubstandard,
+		RssFeedUrl:     "https://news.google.com/rss/search?q=allinurl:bdsmovement.net&hl=en-IL&gl=IL&ceid=IL:en",
+		RssFeedRank:    rankTierSubstandard,
+		DisacrdOGImage: true,
 	},
 
 	{
@@ -94,6 +96,7 @@ var orgs = []struct {
 		RssFeedUrl:          "https://wearenotnumbers.org/category/story/feed",
 		MaxFetchIntervalMin: 60,
 	},
+
 	{
 		Organization: &models.Organization{
 			Uuid:        "419b3510-b226-45c6-9dc6-2cf06acdeecc",
@@ -117,6 +120,7 @@ var orgs = []struct {
 		ContentWhitelistRegex: whitelistRegex,
 		HtmlPaywallRegex:      `(?m)^.*audience\\":\\"only_paid.*$`,
 	},
+
 	{
 		Organization: &models.Organization{
 			Uuid:         "ba603da3-1292-479d-9e0c-33f61a86c0fa",
@@ -145,6 +149,7 @@ var orgs = []struct {
 		RssFeedRank:                 rankTierSuppressed,
 		ContentWhitelistRegex:       whitelistRegex,
 		TitleOrDescriptionTrimRight: " - The Associated Press",
+		DisacrdOGImage:              true,
 	},
 
 	{
@@ -172,7 +177,7 @@ func Initialize(ctx context.Context) error {
 		}
 
 		if org.RssFeedUrl != "" {
-			err = rssfeed.Upsert(ctx, orgUuid, org.RssFeedUrl, org.ContentWhitelistRegex, org.HtmlPaywallRegex, org.TitleOrDescriptionTrimRight, org.RssFeedRank, org.MaxFetchIntervalMin)
+			err = rssfeed.Upsert(ctx, orgUuid, org.RssFeedUrl, org.ContentWhitelistRegex, org.HtmlPaywallRegex, org.TitleOrDescriptionTrimRight, org.RssFeedRank, org.MaxFetchIntervalMin, org.DisacrdOGImage)
 			if err != nil {
 				return errors.Wrapf(err, "failed upserting RSS feed")
 			}

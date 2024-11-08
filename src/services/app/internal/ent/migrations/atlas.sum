@@ -1,4 +1,4 @@
-h1:NTaFLqbWjADOSSuFex2fVlqLN2FyG1l10fOYSMUGBfE=
+h1:fgQ5PGyA/cBElH7sY+4IGk2dDGIZ0R7DmBva3lC8XZk=
 20240323104356_create_org.down.sql h1:UsL9foV5pQQqSI8HRJsled9Q3X9plGaJuohvNRI3VKc=
 20240323104356_create_org.up.sql h1:bctjeUBRW34YnrKS/PMGKsfYuZ8AZbul4mi0PQuQlEQ=
 20240325172134_add_rss.down.sql h1:p0Jjwuuenwh9mqep8a1KwfVYMPdZd7Dz7cd9Zc1hPSg=
@@ -23,3 +23,6 @@ h1:NTaFLqbWjADOSSuFex2fVlqLN2FyG1l10fOYSMUGBfE=
 20240412183719_add_rank.up.sql h1:LSUbWCnvGK6zUJ5ewZ32/Q6TVTOf5vnqK0tS52V2wLw=
 20240413103739_add_rank_index.down.sql h1:a8TD84zpT/O42b2CKMVDPT32ncLeqU3gNg06eEY2V0s=
 20240413103739_add_rank_index.up.sql h1:5k7Hl2j54Aom5AU+VFB84bcMUMa1ElvXJ5+lL4JZB6Y=
+20240712223010_change_bds_rss.up.sql h1:P24gQHPhSKAlOAfWkOSdLEUrKDbpOUiax8f+sj7484Y=
+20241108212907_discard_og_image.down.sql h1:ZY+4FVRyn+OLUMj86KnwAg3w1mxkEp39LCS9/Rsl5zI=
+20241108212907_discard_og_image.up.sql h1:AAPggbI0lYyyHojhsC5eiIx1kub90WWakmr80NGDqWg=

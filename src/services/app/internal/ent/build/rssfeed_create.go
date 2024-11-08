@@ -130,6 +130,12 @@ func (rfc *RSSFeedCreate) SetNillableMaxFetchIntervalMin(i *int64) *RSSFeedCreat
 	return rfc
 }
 
+// SetDiscardOgImage sets the "discard_og_image" field.
+func (rfc *RSSFeedCreate) SetDiscardOgImage(b bool) *RSSFeedCreate {
+	rfc.mutation.SetDiscardOgImage(b)
+	return rfc
+}
+
 // SetID sets the "id" field.
 func (rfc *RSSFeedCreate) SetID(u uuid.UUID) *RSSFeedCreate {
 	rfc.mutation.SetID(u)
@@ -238,6 +244,9 @@ func (rfc *RSSFeedCreate) check() error {
 	if _, ok := rfc.mutation.RssFeedURL(); !ok {
 		return &ValidationError{Name: "rss_feed_url", err: errors.New(`build: missing required field "RSSFeed.rss_feed_url"`)}
 	}
+	if _, ok := rfc.mutation.DiscardOgImage(); !ok {
+		return &ValidationError{Name: "discard_og_image", err: errors.New(`build: missing required field "RSSFeed.discard_og_image"`)}
+	}
 	return nil
 }
 
@@ -305,6 +314,10 @@ func (rfc *RSSFeedCreate) createSpec() (*RSSFeed, *sqlgraph.CreateSpec) {
 	if value, ok := rfc.mutation.MaxFetchIntervalMin(); ok {
 		_spec.SetField(rssfeed.FieldMaxFetchIntervalMin, field.TypeInt64, value)
 		_node.MaxFetchIntervalMin = value
+	}
+	if value, ok := rfc.mutation.DiscardOgImage(); ok {
+		_spec.SetField(rssfeed.FieldDiscardOgImage, field.TypeBool, value)
+		_node.DiscardOgImage = value
 	}
 	if nodes := rfc.mutation.ItemsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -517,6 +530,18 @@ func (u *RSSFeedUpsert) ClearMaxFetchIntervalMin() *RSSFeedUpsert {
 	return u
 }
 
+// SetDiscardOgImage sets the "discard_og_image" field.
+func (u *RSSFeedUpsert) SetDiscardOgImage(v bool) *RSSFeedUpsert {
+	u.Set(rssfeed.FieldDiscardOgImage, v)
+	return u
+}
+
+// UpdateDiscardOgImage sets the "discard_og_image" field to the value that was provided on create.
+func (u *RSSFeedUpsert) UpdateDiscardOgImage() *RSSFeedUpsert {
+	u.SetExcluded(rssfeed.FieldDiscardOgImage)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
@@ -712,6 +737,20 @@ func (u *RSSFeedUpsertOne) UpdateMaxFetchIntervalMin() *RSSFeedUpsertOne {
 func (u *RSSFeedUpsertOne) ClearMaxFetchIntervalMin() *RSSFeedUpsertOne {
 	return u.Update(func(s *RSSFeedUpsert) {
 		s.ClearMaxFetchIntervalMin()
+	})
+}
+
+// SetDiscardOgImage sets the "discard_og_image" field.
+func (u *RSSFeedUpsertOne) SetDiscardOgImage(v bool) *RSSFeedUpsertOne {
+	return u.Update(func(s *RSSFeedUpsert) {
+		s.SetDiscardOgImage(v)
+	})
+}
+
+// UpdateDiscardOgImage sets the "discard_og_image" field to the value that was provided on create.
+func (u *RSSFeedUpsertOne) UpdateDiscardOgImage() *RSSFeedUpsertOne {
+	return u.Update(func(s *RSSFeedUpsert) {
+		s.UpdateDiscardOgImage()
 	})
 }
 
@@ -1077,6 +1116,20 @@ func (u *RSSFeedUpsertBulk) UpdateMaxFetchIntervalMin() *RSSFeedUpsertBulk {
 func (u *RSSFeedUpsertBulk) ClearMaxFetchIntervalMin() *RSSFeedUpsertBulk {
 	return u.Update(func(s *RSSFeedUpsert) {
 		s.ClearMaxFetchIntervalMin()
+	})
+}
+
+// SetDiscardOgImage sets the "discard_og_image" field.
+func (u *RSSFeedUpsertBulk) SetDiscardOgImage(v bool) *RSSFeedUpsertBulk {
+	return u.Update(func(s *RSSFeedUpsert) {
+		s.SetDiscardOgImage(v)
+	})
+}
+
+// UpdateDiscardOgImage sets the "discard_og_image" field to the value that was provided on create.
+func (u *RSSFeedUpsertBulk) UpdateDiscardOgImage() *RSSFeedUpsertBulk {
+	return u.Update(func(s *RSSFeedUpsert) {
+		s.UpdateDiscardOgImage()
 	})
 }
 

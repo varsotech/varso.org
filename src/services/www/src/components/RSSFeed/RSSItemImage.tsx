@@ -91,7 +91,7 @@ function RSSImage({
               style={{
                 display: "block",
                 width: "100%",
-                maxWidth: 400,
+                maxWidth: 250,
                 padding: 60,
                 boxSizing: "border-box",
               }}

@@ -25,6 +25,7 @@ type HTML struct {
 	url      string
 	content  string
 	html     *html.Node
+	loaded   bool
 }
 
 func NewHTMLFromURL(url string) *HTML {
@@ -32,6 +33,10 @@ func NewHTMLFromURL(url string) *HTML {
 }
 
 func (h *HTML) lazyLoad() error {
+	if h.loaded {
+		return nil
+	}
+
 	c := http.Client{}
 
 	req, err := http.NewRequest(http.MethodGet, h.url, nil)
@@ -41,7 +46,7 @@ func (h *HTML) lazyLoad() error {
 
 	// HACK: news.google.com proxy will only return 302 for cURL, otherwise it will do a javascript redirect.
 	req.Header.Set("User-Agent", "curl/8.1.2")
-
+	
 	// Run with retries
 	resp, err := h.doWithRetries(req, c)
 	if err != nil {
@@ -64,6 +69,7 @@ func (h *HTML) lazyLoad() error {
 	}
 	h.html = doc
 
+	h.loaded = true
 	return nil
 }
 
@@ -74,7 +80,7 @@ func (h *HTML) doRequest(req *http.Request, c http.Client) (*http.Response, erro
 	}
 
 	if resp.StatusCode != 200 {
-		resp.Body.Close()
+		_ = resp.Body.Close()
 		return nil, errors.Errorf("got bad status code %d retrieving item HTML", resp.StatusCode)
 	}
 

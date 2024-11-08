@@ -180,6 +180,7 @@ var (
 		{Name: "title_trim_right", Type: field.TypeString, Nullable: true},
 		{Name: "rss_feed_rank", Type: field.TypeFloat32, Nullable: true},
 		{Name: "max_fetch_interval_min", Type: field.TypeInt64, Nullable: true},
+		{Name: "discard_og_image", Type: field.TypeBool},
 		{Name: "organization_feeds", Type: field.TypeUUID, Nullable: true},
 	}
 	// RssFeedsTable holds the schema information for the "rss_feeds" table.
@@ -190,7 +191,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "rss_feeds_organizations_feeds",
-				Columns:    []*schema.Column{RssFeedsColumns[9]},
+				Columns:    []*schema.Column{RssFeedsColumns[10]},
 				RefColumns: []*schema.Column{OrganizationsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
