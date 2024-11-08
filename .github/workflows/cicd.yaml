@@ -1,12 +1,15 @@
 name: "CI CD"
 
-on: # yamllint disable-line rule:truthy
+on:
   push:
     tags:
       - "**"
-    branches: [main]
-  pull_request:
-    branches: [main]
+    branches: 
+      - "**"
+    
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
 
 env:
   PROD_EC2_PRIVATE_KEY: ${{ secrets.PROD_EC2_PRIVATE_KEY }}
@@ -182,7 +185,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: ${{ env.CONTAINER_REGISTRY }}/${{ github.repository }}/${{ matrix.service }}
+          images: "${{ env.CONTAINER_REGISTRY }}/${{ github.repository }}/${{ matrix.service }}"
 
       - name: Extract args from docker-compose.yaml
         id: compose

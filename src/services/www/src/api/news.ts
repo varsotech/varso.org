@@ -9,7 +9,7 @@ import axios from "./axios";
 
 export function useNews(
   feedType: string,
-  options?: UseQueryOptions<AxiosResponse<GetNewsResponse>>
+  options?: Partial<UseQueryOptions<AxiosResponse<GetNewsResponse>>>
 ) {
   return useQuery<GetNewsResponse>(
     async () => await axios.get(`/api/v1/app/news/${feedType}`),
